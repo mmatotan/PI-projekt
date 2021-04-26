@@ -22,26 +22,29 @@ public class MenuScreen implements Screen {
 		parent = game;
 		
 		stage = new Stage(new ScreenViewport()); //Controller that will react to inputs from the user
-		Gdx.input.setInputProcessor(stage);
 	}
 
 	@Override
 	public void show() {
+		Gdx.input.setInputProcessor(stage); //Listen for inputs from the stage
+		
 		Table table = new Table(); //Used to store buttons for UI
 		table.setFillParent(true);
-		//table.setDebug(true); //If left uncommented it will show the borders of the table
+		//table.setDebug(true); //If left uncommented it will show the borders of the table for debugging
 		stage.addActor(table);
 		
 		Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json")); //Adds a skin template which we'll use
 		
+		//UI Elements
 		TextButton newGame = new TextButton("New Game", skin);
 		TextButton preferences = new TextButton("Preferences", skin);
 		TextButton exit = new TextButton("Exit", skin);
-		Label title = new Label("Horcrux Hunt", skin);
+		Label title = new Label("Igrica", skin);
 		
-		table.add(title).fillX().uniformX();
+		//Fill the screen with before created elements
+		table.add(title);
 		table.row().pad(10, 0, 10, 0); //Add empty space 10 pixels up, 10 pixels down
-		table.add(newGame).fillX().uniformX(); //Add a button in table and make in uniform
+		table.add(newGame).fillX().uniformX();
 		table.row().pad(0, 0, 10, 0);
 		table.add(preferences).fillX().uniformX();
 		table.row();
@@ -70,6 +73,7 @@ public class MenuScreen implements Screen {
 		});
 	}
 
+	//Render the data set in the show method
 	@Override
 	public void render(float delta) {
 		Gdx.gl.glClearColor(0f, 0f, 0f, 1);
