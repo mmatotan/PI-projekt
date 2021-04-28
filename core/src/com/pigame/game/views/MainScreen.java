@@ -1,6 +1,12 @@
 package com.pigame.game.views;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+//
+import com.badlogic.gdx.graphics.OrthographicCamera;
+//
+
 import com.pigame.game.*;
 
 public class MainScreen implements Screen{
@@ -11,16 +17,37 @@ public class MainScreen implements Screen{
 		parent = game;
 	}
 	
+	//NEWW
+	OrthographicCamera cam;
+	
+	GameMap gameMap;
+	//
+	
+	
 	@Override
 	public void show() {
-		// TODO Auto-generated method stub
+		//
+		cam = new OrthographicCamera();
+		cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		cam.update();
 		
+		gameMap = new TiledGameMap();
+		//
 	}
 
 	@Override
 	public void render(float delta) {
-		// TODO Auto-generated method stub
+		//
+		Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
+		if (Gdx.input.isTouched()) {
+			cam.translate(-Gdx.input.getDeltaX(), Gdx.input.getDeltaY());
+			cam.update();
+		}
+		
+		gameMap.render(cam);
+		//
 	}
 
 	@Override
