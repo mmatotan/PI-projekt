@@ -11,13 +11,12 @@ public enum TileType {
 	DOOR(5, true, "Door"),
 	WALL(6, true, "Wall");
 	
-	public static final int TILE_SIZE = 16;//nes
-	
+	public static final int TILE_SIZE = 16;
 	
 	private int id;
 	private boolean collidable;
 	private String name;
-	private float damage; //vjv maknut
+	private float damage;
 	
 	private TileType (int id, boolean collidable, String name) {
 		this(id, collidable, name, 0);
@@ -29,7 +28,6 @@ public enum TileType {
 		this.name = name;
 		this.damage = damage;
 	}
-
 	
 	public int getId() {
 		return id;
@@ -42,14 +40,17 @@ public enum TileType {
 	public String getName() {
 		return name;
 	}
-    //maknut...
+    
 	public float getDamage() {
 		return damage;
 	}
 
+	
 	private static HashMap<Integer, TileType> tileMap;
 	
 	static {
+		tileMap = new HashMap <Integer, TileType>();
+		 
 		for (TileType tileType : TileType.values()) {
 			tileMap.put(tileType.getId(), tileType);
 		}

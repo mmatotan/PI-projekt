@@ -5,8 +5,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 //
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 //
-
+import com.badlogic.gdx.math.Vector3;
 import com.pigame.game.*;
 
 public class MainScreen implements Screen{
@@ -15,39 +16,33 @@ public class MainScreen implements Screen{
 
 	public MainScreen(Game game) {
 		parent = game;
-	}
-	
-	//NEWW
+	}	
+
 	OrthographicCamera cam;
-	
 	GameMap gameMap;
-	//
-	
 	
 	@Override
 	public void show() {
-		//
+		
 		cam = new OrthographicCamera();
 		cam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		cam.update();
 		
 		gameMap = new TiledGameMap();
-		//
 	}
 
 	@Override
 	public void render(float delta) {
-		//
+		
 		Gdx.gl.glClearColor(0f, 0f, 0f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		if (Gdx.input.isTouched()) {
 			cam.translate(-Gdx.input.getDeltaX(), Gdx.input.getDeltaY());
-			cam.update();
+			cam.update();	
 		}
-		
+				
 		gameMap.render(cam);
-		//
 	}
 
 	@Override
@@ -77,7 +72,6 @@ public class MainScreen implements Screen{
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
-		
 	}
 
 }
