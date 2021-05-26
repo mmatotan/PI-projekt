@@ -11,20 +11,34 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.pigame.game.*;
+import com.pigame.game.player.Player;
 
 public class MainScreen implements Screen, InputProcessor{
 	
 	final int TILE_SIZE = 16;
 	
 	private Game parent;
+	private Stage stage;
+	
 	Texture img;
 	OrthographicCamera cam;
 	TiledMap tiledMap;
 	TiledMapRenderer tiledMapRenderer;
+	
+	Player player;
+	ProgressBar HPBar;
+	ProgressBar ManaBar;
 
 	public MainScreen(Game game) {
 		parent = game;
+		
+		stage = new Stage(new ScreenViewport());
 	}	
 	
 	@Override
@@ -34,22 +48,53 @@ public class MainScreen implements Screen, InputProcessor{
 		float h = Gdx.graphics.getHeight();
 		
 		cam = new OrthographicCamera();
-		cam.setToOrtho(false, w/2, h/2);
+		cam.setToOrtho(false, w/2, h/2); //Setting the camera to be zoomed in, too zoomed out otherwise
 		cam.update();
-		tiledMap = new TmxMapLoader().load("maps/MapGame.tmx");
-		tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+		tiledMap = new TmxMapLoader().load("maps/MapGame.tmx"); //Loading of the .tmx file
+		tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap); //Loading the map as orthogonal(bird view)
 		Gdx.input.setInputProcessor(this);
+		
+		player = new Player(); //Init of player class
+		
+		//Classic stage implementation for HUD(HP and Mana display)
+		Table table = new Table();
+		table.setFillParent(true);
+		table.setPosition(w/2 - 5 * TILE_SIZE, h/2 - 2 * TILE_SIZE, TILE_SIZE);
+		stage.addActor(table);
+		
+		Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+		
+		HPBar = new ProgressBar(0, player.getMaxHP(), 1, false, skin);
+		ManaBar = new ProgressBar(0, player.getMaxMana(), 1, false, skin);
+		ManaBar.setColor(0, 0, 1, 1); //Blue
+		
+		table.add(HPBar);
+		table.row().pad(10, 0, 10, 0);
+		table.add(ManaBar);
 		
 	}
 
 	@Override
 	public void render(float delta) {
-		
 		Gdx.gl.glClearColor(0f, 0f, 0f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		cam.update();
 		tiledMapRenderer.setView(cam);
 		tiledMapRenderer.render();
+		
+		//Change color to red if HP lower than 20
+		if(player.getHP() > 50) {
+			HPBar.setColor(0, 1, 0, 1);
+		} else {
+			HPBar.setColor(1, 0, 0, 1);
+		}
+		
+		//Update values in the progress bars
+		HPBar.setValue(player.getHP());
+		ManaBar.setValue(player.getMana());
+		
+		stage.act();
+		stage.draw();
 				
 	}
 
@@ -79,12 +124,13 @@ public class MainScreen implements Screen, InputProcessor{
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
+		stage.dispose();
 	}
 
 	
 	@Override
 	public boolean keyDown(int keycode) {
+		//Movement, temporarily moves the map around, should move the sprite of the main character
         if(keycode == Input.Keys.LEFT)
             cam.translate(-TILE_SIZE,0);
         if(keycode == Input.Keys.RIGHT)
@@ -143,7 +189,4 @@ public class MainScreen implements Screen, InputProcessor{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	
-
 }
