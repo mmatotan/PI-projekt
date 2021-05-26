@@ -1,4 +1,4 @@
-package com.pigame.game.views;
+package com.pigame.game.maps;
 
 import java.util.HashMap;
 

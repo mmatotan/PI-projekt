@@ -1,24 +1,17 @@
-package com.pigame.game.views;
+package com.pigame.game.maps;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class TiledGameMap extends GameMap {
+public class MainMap extends GameMap {
 	
 	TiledMap tiledMap;
 	OrthogonalTiledMapRenderer tiledMapRenderer; 
 	
-	public TiledGameMap () {
-		tiledMap = new TmxMapLoader().load("MapGame.tmx");
+	public MainMap() {
+		tiledMap = new TmxMapLoader().load("maps/MapGame.tmx");
 		tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 	}
 	

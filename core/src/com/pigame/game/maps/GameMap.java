@@ -1,9 +1,6 @@
-package com.pigame.game.views;
+package com.pigame.game.maps;
 
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 public abstract class GameMap {
 
