@@ -7,10 +7,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -20,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.pigame.game.*;
 import com.pigame.game.player.Player;
+import com.pigame.game.renders.OrthogonalTiledMapRendererWithSprites;
 
 public class MainScreen implements Screen, InputProcessor{
 	
@@ -35,9 +39,8 @@ public class MainScreen implements Screen, InputProcessor{
 	Texture img;
 	OrthographicCamera cam;
 	TiledMap tiledMap;
-	TiledMapRenderer tiledMapRenderer;
+	OrthogonalTiledMapRendererWithSprites tiledMapRenderer;
 	
-	SpriteBatch spriteBatch;
 	Sprite sprite;
 	Texture texture;
 	Player player;
@@ -54,12 +57,10 @@ public class MainScreen implements Screen, InputProcessor{
 	public void show() {
 		Gdx.input.setInputProcessor(this);
 				
-		tiledMap = new TmxMapLoader().load("maps/MapGame.tmx"); //Loading of the .tmx file
-		tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap); //Loading the map as orthogonal(bird view)
-		
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 		
+		tiledMap = new TmxMapLoader().load("maps/MapGame.tmx"); //Loading of the .tmx file
 		int mapWidth = tiledMap.getProperties().get("width", Integer.class);
 		int mapHeight = tiledMap.getProperties().get("height", Integer.class);
 		
@@ -71,9 +72,13 @@ public class MainScreen implements Screen, InputProcessor{
 		cam.update();
 		
 		player = new Player(mapWidth/2 * TILE_SIZE, 6 * TILE_SIZE); //Init of player class in middle of screen
-		spriteBatch = new SpriteBatch();
 		texture = new Texture(Gdx.files.internal("dungeon_assets/frames/wizzard_m_idle_anim_f0.png"));
 		sprite = new Sprite(texture);
+		sprite.setPosition(player.getX(), player.getY());
+		
+		tiledMapRenderer = new OrthogonalTiledMapRendererWithSprites(tiledMap); //Loading the map as orthogonal(bird view)
+		tiledMapRenderer.addSprite(sprite);
+		tiledMapRenderer.render();
 		
 		//Classic stage implementation for HUD(HP and Mana display)
 		Table table = new Table();
@@ -102,12 +107,6 @@ public class MainScreen implements Screen, InputProcessor{
 		cam.update();
 		tiledMapRenderer.setView(cam);
 		tiledMapRenderer.render();
-		
-		spriteBatch.setProjectionMatrix(cam.combined);
-		spriteBatch.begin();
-		sprite.setPosition(player.getX(), player.getY());
-		sprite.draw(spriteBatch);
-		spriteBatch.end();
 		
 		//Change color to red if HP lower than 20
 		if(player.getHP() > 50) {
@@ -160,12 +159,18 @@ public class MainScreen implements Screen, InputProcessor{
 		//Movement, temporarily moves the map around, should move the sprite of the main character
         if(keycode == Input.Keys.LEFT) {
         	if(player.getX() > 0) {
+        		if(!sprite.isFlipX()) {
+            		sprite.flip(true, false);
+        		}
         		player.setX(player.getX()-TILE_SIZE);
         		cam.translate(-TILE_SIZE,0);
         	}
         }
         if(keycode == Input.Keys.RIGHT) {
         	if(player.getX() < (MAP_SIZE_X - 1)*TILE_SIZE) {
+        		if(sprite.isFlipX()) {
+            		sprite.flip(true, false);
+        		}
         		cam.translate(TILE_SIZE,0);
         		player.setX(player.getX()+TILE_SIZE);
         	}
@@ -182,6 +187,7 @@ public class MainScreen implements Screen, InputProcessor{
         		player.setY(player.getY()+TILE_SIZE);
         	}
         }
+        sprite.setPosition(player.getX(), player.getY());
 		return false;
 	}
 	
