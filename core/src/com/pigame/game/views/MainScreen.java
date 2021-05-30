@@ -41,6 +41,7 @@ public class MainScreen implements Screen, InputProcessor{
 	ProgressBar ManaBar;
 	Window pauseWindow;
 	
+	
 	boolean isPaused = false;
 	
 	public MainScreen(Game game) {
