@@ -2,6 +2,7 @@ package com.pigame.game.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,10 +11,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.pigame.game.*;
 import com.pigame.game.player.Player;
@@ -40,12 +46,17 @@ public class MainScreen implements Screen, InputProcessor{
 	Player player;
 	ProgressBar HPBar;
 	ProgressBar ManaBar;
-
+	Window pauseWindow;
+	
+	
+	boolean isPaused = false;
+	
 	public MainScreen(Game game) {
 		parent = game;
 		
 		stage = new Stage(new ScreenViewport());
 	}	
+	
 	
 	@Override
 	public void show() {
@@ -83,11 +94,12 @@ public class MainScreen implements Screen, InputProcessor{
 		table.setFillParent(true);
 		table.setPosition(w/2 - 5 * TILE_SIZE, h/2 - 2 * TILE_SIZE, TILE_SIZE);
 		stage.addActor(table);
-		
-		//Define the skin being used
+    
+    createPauseWindow();
+
+  	//Define the skin being used
 		Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
-		
-		//Create progress bars starting from zero all the way to the maximum defined number with a step of 1
+    //Create progress bars starting from zero all the way to the maximum defined number with a step of 1
 		HPBar = new ProgressBar(0, player.getMaxHP(), 1, false, skin);
 		ManaBar = new ProgressBar(0, player.getMaxMana(), 1, false, skin);
 		ManaBar.setColor(0, 0, 1, 1); //Blue
@@ -97,9 +109,48 @@ public class MainScreen implements Screen, InputProcessor{
 		table.row().pad(10, 0, 10, 0);
 		table.add(ManaBar);
 	}
+  
+  public void createPauseWindow(){
+    // Pause window
+		pauseWindow = new Window("PAUSE", skin);
+		TextButton continueButton = new TextButton("Continue", skin);
+		continueButton.addListener(new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				resume();
+			}
+		});
+		pauseWindow.padTop(64);
+		pauseWindow.add(continueButton);
+		pauseWindow.setSize(stage.getWidth() / 1.5f, stage.getHeight() / 1.5f);
+		pauseWindow.setPosition(stage.getWidth() / 2 - pauseWindow.getWidth() / 2, stage.getHeight() / 2 - pauseWindow.getHeight() / 2);
+  }
+    
 
 	@Override
 	public void render(float delta) {
+		if(!isPaused) {
+			Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			cam.update();
+			tiledMapRenderer.setView(cam);
+			tiledMapRenderer.render();
+		} else {
+			//don't update, wait for resume
+			stage.addActor(pauseWindow);
+			if(Gdx.input.isKeyPressed(Keys.SPACE)) {
+				if(isPaused) {
+					resume();
+				}
+			}
+		}
+			
+		if(Gdx.input.isKeyPressed(Keys.SPACE)) {
+			if(!isPaused) {
+				pause();
+			}
+		}
+	
 		Gdx.gl.glClearColor(1f, 0f, 0f, 1);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -114,7 +165,7 @@ public class MainScreen implements Screen, InputProcessor{
 		} else {
 			HPBar.setColor(1, 0, 0, 1);
 		}
-		
+			
 		//Update values in the progress bars
 		HPBar.setValue(player.getHP());
 		ManaBar.setValue(player.getMana());
@@ -131,13 +182,12 @@ public class MainScreen implements Screen, InputProcessor{
 
 	@Override
 	public void pause() {
-		// TODO Auto-generated method stub
-		
+		isPaused = true;
 	}
 
 	@Override
 	public void resume() {
-		// TODO Auto-generated method stub
+		isPaused = false;
 		
 	}
 
