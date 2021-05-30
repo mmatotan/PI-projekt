@@ -1,5 +1,7 @@
 package com.pigame.game.player;
 
+import com.badlogic.gdx.Gdx;
+
 public class Player {
 	//Main stats, X&Y are coordinates on a map
 	private int HP;
