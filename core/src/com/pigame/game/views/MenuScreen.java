@@ -16,7 +16,7 @@ import com.pigame.game.*;
 public class MenuScreen implements Screen {
 	
 	private Game parent;
-	private Stage stage;
+	public Stage stage;
 	
 	public MenuScreen(Game game) {
 		parent = game;
@@ -40,6 +40,7 @@ public class MenuScreen implements Screen {
 		TextButton preferences = new TextButton("Preferences", skin);
 		TextButton exit = new TextButton("Exit", skin);
 		Label title = new Label("Igrica", skin);
+		
 		
 		//Fill the screen with before created elements
 		table.add(title);

@@ -2,7 +2,6 @@ package com.pigame.game.player;
 
 public class Player {
 	
-	final int TILE_SIZE = 16;
 	//Main stats, X&Y are coordinates on a map
 	private int HP;
 	private int maxHP;

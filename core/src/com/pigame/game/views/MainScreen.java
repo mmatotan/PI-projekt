@@ -7,15 +7,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -27,11 +21,11 @@ import com.pigame.game.renders.OrthogonalTiledMapRendererWithSprites;
 
 public class MainScreen implements Screen, InputProcessor{
 	
-	final int TILE_SIZE = 16;
-	final int MAP_SIZE_X = 40;
-	final int MAP_SIZE_Y = 60;
-	final int CAM_WIDTH_TILES = 21;
-	final int CAM_HEIGHT_TILES = 13;
+	public final int TILE_SIZE = 16;
+	public final int MAP_SIZE_X = 40;
+	public final int MAP_SIZE_Y = 60;
+	public final int CAM_WIDTH_TILES = 21;
+	public final int CAM_HEIGHT_TILES = 13;
 	
 	private Game parent;
 	private Stage stage;
@@ -80,22 +74,28 @@ public class MainScreen implements Screen, InputProcessor{
 		tiledMapRenderer.addSprite(sprite);
 		tiledMapRenderer.render();
 		
+		addBars(w, h);
+	}
+	
+	private void addBars(float w, float h) {
 		//Classic stage implementation for HUD(HP and Mana display)
 		Table table = new Table();
 		table.setFillParent(true);
 		table.setPosition(w/2 - 5 * TILE_SIZE, h/2 - 2 * TILE_SIZE, TILE_SIZE);
 		stage.addActor(table);
 		
+		//Define the skin being used
 		Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 		
+		//Create progress bars starting from zero all the way to the maximum defined number with a step of 1
 		HPBar = new ProgressBar(0, player.getMaxHP(), 1, false, skin);
 		ManaBar = new ProgressBar(0, player.getMaxMana(), 1, false, skin);
 		ManaBar.setColor(0, 0, 1, 1); //Blue
 		
+		//Add the bars to the table
 		table.add(HPBar);
 		table.row().pad(10, 0, 10, 0);
 		table.add(ManaBar);
-		
 	}
 
 	@Override
@@ -108,7 +108,7 @@ public class MainScreen implements Screen, InputProcessor{
 		tiledMapRenderer.setView(cam);
 		tiledMapRenderer.render();
 		
-		//Change color to red if HP lower than 20
+		//Change color to red if HP lower than 50
 		if(player.getHP() > 50) {
 			HPBar.setColor(0, 1, 0, 1);
 		} else {
@@ -121,7 +121,6 @@ public class MainScreen implements Screen, InputProcessor{
 		
 		stage.act();
 		stage.draw();
-				
 	}
 
 	@Override
@@ -158,37 +157,54 @@ public class MainScreen implements Screen, InputProcessor{
 	public boolean keyDown(int keycode) {
 		//Movement, temporarily moves the map around, should move the sprite of the main character
         if(keycode == Input.Keys.LEFT) {
-        	if(player.getX() > 0) {
-        		if(!sprite.isFlipX()) {
-            		sprite.flip(true, false);
-        		}
-        		player.setX(player.getX()-TILE_SIZE);
-        		cam.translate(-TILE_SIZE,0);
-        	}
+        	moveLeft(player, cam);
         }
         if(keycode == Input.Keys.RIGHT) {
-        	if(player.getX() < (MAP_SIZE_X - 1)*TILE_SIZE) {
-        		if(sprite.isFlipX()) {
-            		sprite.flip(true, false);
-        		}
-        		cam.translate(TILE_SIZE,0);
-        		player.setX(player.getX()+TILE_SIZE);
-        	}
-        }
-        if(keycode == Input.Keys.DOWN) {
-        	if(player.getY() > 0) {
-        		cam.translate(0,-TILE_SIZE);
-        		player.setY(player.getY()-TILE_SIZE);
-        	}
+        	moveRight(player, cam);
         }
         if(keycode == Input.Keys.UP) {
-        	if(player.getY() < (MAP_SIZE_Y - 1)*TILE_SIZE) {
-        		cam.translate(0,TILE_SIZE);
-        		player.setY(player.getY()+TILE_SIZE);
-        	}
+        	moveUp(player, cam);
         }
+        if(keycode == Input.Keys.DOWN) {
+        	moveDown(player, cam);
+        }
+        
         sprite.setPosition(player.getX(), player.getY());
 		return false;
+	}
+	
+	public void moveLeft(Player player, OrthographicCamera cam) {
+    	if(player.getX() > 0) {
+    		if(!sprite.isFlipX()) {
+        		sprite.flip(true, false);
+    		}
+    		player.setX(player.getX()-TILE_SIZE);
+    		cam.translate(-TILE_SIZE,0);
+    	}
+	}
+	
+	public void moveRight(Player player, OrthographicCamera cam) {
+    	if(player.getX() < (MAP_SIZE_X - 1)*TILE_SIZE) {
+    		if(sprite.isFlipX()) {
+        		sprite.flip(true, false);
+    		}
+    		cam.translate(TILE_SIZE,0);
+    		player.setX(player.getX()+TILE_SIZE);
+    	}
+	}
+	
+	public void moveUp(Player player, OrthographicCamera cam) {
+    	if(player.getY() < (MAP_SIZE_Y - 1)*TILE_SIZE) {
+    		cam.translate(0,TILE_SIZE);
+    		player.setY(player.getY()+TILE_SIZE);
+    	}
+	}
+	
+	public void moveDown(Player player, OrthographicCamera cam) {
+    	if(player.getY() > 0) {
+    		cam.translate(0,-TILE_SIZE);
+    		player.setY(player.getY()-TILE_SIZE);
+    	}
 	}
 	
 

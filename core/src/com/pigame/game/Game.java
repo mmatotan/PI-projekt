@@ -42,14 +42,18 @@ public class Game extends com.badlogic.gdx.Game {
 	//Creation leads to a loading screen which forwards itself to the main menu screen
 	@Override
 	public void create() {
-		preferences = new AppPreferences();
+		createPreferences();
 		
 		loadingScreen = new LoadingScreen(this);
 		setScreen(loadingScreen);
 	}
+	
+	public void createPreferences() {
+		preferences = new AppPreferences();
+	}
 
 	//Fetch preferences for this game
 	public AppPreferences getPreferences() {
-		return this.preferences;
+		return this.preferences;	
 	}
 }
