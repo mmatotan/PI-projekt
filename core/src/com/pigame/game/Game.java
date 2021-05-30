@@ -50,10 +50,7 @@ public class Game extends com.badlogic.gdx.Game {
 	//Creation leads to a loading screen which forwards itself to the main menu screen
 	@Override
 	public void create() {
-		preferences = new AppPreferences();
-		
-		loadingScreen = new LoadingScreen(this);
-		setScreen(loadingScreen);
+		createPreferences();
 		
 		music = Gdx.audio.newMusic(Gdx.files.internal("ElevatorMusic.mp3"));
 		music.setLooping(true);
@@ -70,12 +67,19 @@ public class Game extends com.badlogic.gdx.Game {
 				sound.setPitch(soundId, 2);
 			}
 		}
+    
+    loadingScreen = new LoadingScreen(this);
+		setScreen(loadingScreen);
+    
 	}
 	
-	
+	public void createPreferences() {
+		preferences = new AppPreferences();
+	}
+
 	//Fetch preferences for this game
 	public AppPreferences getPreferences() {
-		return this.preferences;
+		return this.preferences;	
 	}
 	
 	@Override
