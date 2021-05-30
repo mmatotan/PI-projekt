@@ -95,10 +95,10 @@ public class MainScreen implements Screen, InputProcessor{
 		table.setPosition(w/2 - 5 * TILE_SIZE, h/2 - 2 * TILE_SIZE, TILE_SIZE);
 		stage.addActor(table);
     
-    createPauseWindow();
 
   	//Define the skin being used
 		Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+		createPauseWindow(skin);
     //Create progress bars starting from zero all the way to the maximum defined number with a step of 1
 		HPBar = new ProgressBar(0, player.getMaxHP(), 1, false, skin);
 		ManaBar = new ProgressBar(0, player.getMaxMana(), 1, false, skin);
@@ -110,8 +110,8 @@ public class MainScreen implements Screen, InputProcessor{
 		table.add(ManaBar);
 	}
   
-  public void createPauseWindow(){
-    // Pause window
+  public void createPauseWindow(Skin skin){
+	  	// Pause window
 		pauseWindow = new Window("PAUSE", skin);
 		TextButton continueButton = new TextButton("Continue", skin);
 		continueButton.addListener(new ClickListener() {
@@ -120,6 +120,7 @@ public class MainScreen implements Screen, InputProcessor{
 				resume();
 			}
 		});
+		
 		pauseWindow.padTop(64);
 		pauseWindow.add(continueButton);
 		pauseWindow.setSize(stage.getWidth() / 1.5f, stage.getHeight() / 1.5f);
