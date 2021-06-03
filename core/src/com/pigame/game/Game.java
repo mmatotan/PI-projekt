@@ -73,6 +73,25 @@ public class Game extends com.badlogic.gdx.Game {
     
 	}
 	
+	public Music getMusic() {
+		return music;
+	}
+	
+	public void setTrack(String track) {
+		music.dispose();
+		music = Gdx.audio.newMusic(Gdx.files.internal(track));
+		music.setLooping(true);
+		if(getPreferences().isMusicEnabled()) {
+			music.setVolume(getPreferences().getMusicVolume());
+			music.play();
+		}
+	}
+
+	public Sound getSound() {
+		return sound;
+	}
+
+
 	public void createPreferences() {
 		preferences = new AppPreferences();
 	}

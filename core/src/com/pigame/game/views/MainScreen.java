@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
@@ -19,7 +20,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.pigame.game.*;
 import com.pigame.game.player.Player;
@@ -48,22 +51,25 @@ public class MainScreen implements Screen, InputProcessor{
 	ProgressBar ManaBar;
 	Window pauseWindow;
 	
+	Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 	
 	boolean isPaused = false;
+	
+	float w;
+	float h;
 	
 	public MainScreen(Game game) {
 		parent = game;
 		
 		stage = new Stage(new ScreenViewport());
-	}	
-	
+	}
 	
 	@Override
 	public void show() {
 		Gdx.input.setInputProcessor(this);
-				
-		float w = Gdx.graphics.getWidth();
-		float h = Gdx.graphics.getHeight();
+		
+		w = Gdx.graphics.getWidth();
+		h = Gdx.graphics.getHeight();
 		
 		tiledMap = new TmxMapLoader().load("maps/MapGame.tmx"); //Loading of the .tmx file
 		int mapWidth = tiledMap.getProperties().get("width", Integer.class);
@@ -85,21 +91,19 @@ public class MainScreen implements Screen, InputProcessor{
 		tiledMapRenderer.addSprite(sprite);
 		tiledMapRenderer.render();
 		
-		addBars(w, h);
+		addBars();
+		
+		parent.setTrack("Wiimusic.mp3");
 	}
 	
-	private void addBars(float w, float h) {
+	private void addBars() {
 		//Classic stage implementation for HUD(HP and Mana display)
 		Table table = new Table();
 		table.setFillParent(true);
 		table.setPosition(w/2 - 5 * TILE_SIZE, h/2 - 2 * TILE_SIZE, TILE_SIZE);
 		stage.addActor(table);
     
-
-  	//Define the skin being used
-		Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
-		createPauseWindow(skin);
-    //Create progress bars starting from zero all the way to the maximum defined number with a step of 1
+		//Create progress bars starting from zero all the way to the maximum defined number with a step of 1
 		HPBar = new ProgressBar(0, player.getMaxHP(), 1, false, skin);
 		ManaBar = new ProgressBar(0, player.getMaxMana(), 1, false, skin);
 		ManaBar.setColor(0, 0, 1, 1); //Blue
@@ -110,69 +114,63 @@ public class MainScreen implements Screen, InputProcessor{
 		table.add(ManaBar);
 	}
   
-  public void createPauseWindow(Skin skin){
+	public void createPauseWindow(){
 	  	// Pause window
 		pauseWindow = new Window("PAUSE", skin);
+		
 		TextButton continueButton = new TextButton("Continue", skin);
-		continueButton.addListener(new ClickListener() {
+		TextButton exitButton = new TextButton("Exit", skin);
+		
+		continueButton.addListener(new ChangeListener() {
 			@Override
-			public void clicked(InputEvent event, float x, float y) {
-				resume();
+			public void changed(ChangeEvent event, Actor actor) {
+				resumeGame();
 			}
 		});
 		
-		pauseWindow.padTop(64);
+		exitButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				Gdx.app.exit();
+			}
+		});
+		
 		pauseWindow.add(continueButton);
-		pauseWindow.setSize(stage.getWidth() / 1.5f, stage.getHeight() / 1.5f);
+		pauseWindow.row().pad(16);
+		pauseWindow.add(exitButton);
+		pauseWindow.setSize(stage.getWidth() / 3f, stage.getHeight() / 3f);
 		pauseWindow.setPosition(stage.getWidth() / 2 - pauseWindow.getWidth() / 2, stage.getHeight() / 2 - pauseWindow.getHeight() / 2);
-  }
+	}
     
-
 	@Override
 	public void render(float delta) {
-		if(!isPaused) {
-			Gdx.gl.glClearColor(0f, 0f, 0f, 1);
+		if(isPaused) {
+			stage.act();
+			stage.draw();
+		}
+		else {
+			Gdx.gl.glClearColor(1f, 0f, 0f, 1);
+			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+			
 			cam.update();
 			tiledMapRenderer.setView(cam);
 			tiledMapRenderer.render();
-		} else {
-			//don't update, wait for resume
-			stage.addActor(pauseWindow);
-			if(Gdx.input.isKeyPressed(Keys.SPACE)) {
-				if(isPaused) {
-					resume();
-				}
-			}
-		}
 			
-		if(Gdx.input.isKeyPressed(Keys.SPACE)) {
-			if(!isPaused) {
-				pause();
+			//Change color to red if HP lower than 50
+			if(player.getHP() > 50) {
+				HPBar.setColor(0, 1, 0, 1);
+			} else {
+				HPBar.setColor(1, 0, 0, 1);
 			}
-		}
-	
-		Gdx.gl.glClearColor(1f, 0f, 0f, 1);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
-		cam.update();
-		tiledMapRenderer.setView(cam);
-		tiledMapRenderer.render();
-		
-		//Change color to red if HP lower than 50
-		if(player.getHP() > 50) {
-			HPBar.setColor(0, 1, 0, 1);
-		} else {
-			HPBar.setColor(1, 0, 0, 1);
-		}
+				
+			//Update values in the progress bars
+			HPBar.setValue(player.getHP());
+			ManaBar.setValue(player.getMana());
 			
-		//Update values in the progress bars
-		HPBar.setValue(player.getHP());
-		ManaBar.setValue(player.getMana());
-		
-		stage.act();
-		stage.draw();
+			stage.act();
+			stage.draw();
+		}
 	}
 
 	@Override
@@ -183,13 +181,26 @@ public class MainScreen implements Screen, InputProcessor{
 
 	@Override
 	public void pause() {
-		isPaused = true;
 	}
-
+	
 	@Override
 	public void resume() {
+	}
+	
+	private void pauseGame() {
+		isPaused = true;
+		createPauseWindow();
+		stage.addActor(pauseWindow);
+		Gdx.input.setInputProcessor(stage);
+		return;
+	}
+	
+	private void resumeGame() {
 		isPaused = false;
-		
+		pauseWindow.remove();
+		pauseWindow.clear();
+		Gdx.input.setInputProcessor(this);
+		return;
 	}
 
 	@Override
@@ -218,6 +229,14 @@ public class MainScreen implements Screen, InputProcessor{
         }
         if(keycode == Input.Keys.DOWN) {
         	moveDown(player, cam);
+        }
+        if(keycode == Input.Keys.ESCAPE) {
+        	if(isPaused) {
+        		resumeGame();
+        	} else {
+        		pauseGame();
+        	}
+        	return false;
         }
         
         sprite.setPosition(player.getX(), player.getY());

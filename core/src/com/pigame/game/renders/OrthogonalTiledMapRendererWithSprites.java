@@ -27,10 +27,14 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
 	
     @Override
     public void render() {
+    	//Start rendering
         beginRender();
+        //For counting layers
         int currentLayer = 0;
         for (MapLayer layer : map.getLayers()) {
+        	//We can decide to hide a certain layer
             if (layer.isVisible()) {
+            	//Render the map layer and if the next layer is a sprite, render the sprite afterwards
                 if (layer instanceof TiledMapTileLayer) {
                     renderTileLayer((TiledMapTileLayer)layer);
                     currentLayer++;
