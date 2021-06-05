@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -12,6 +13,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -96,6 +99,14 @@ public class MainScreen implements Screen, InputProcessor{
 		parent.setTrack("Wiimusic.mp3");
 	}
 	
+	public static void followPlayer(Camera cam, Player player) {
+		Vector3 position = cam.position;
+		position.x = player.getX();
+		position.y = player.getY();
+		cam.position.set(position);
+		cam.update();
+	}
+	
 	private void addBars() {
 		//Classic stage implementation for HUD(HP and Mana display)
 		Table table = new Table();
@@ -154,6 +165,12 @@ public class MainScreen implements Screen, InputProcessor{
 			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 			
 			cam.update();
+			followPlayer(cam, player);
+			float startX = cam.viewportWidth / 2;
+			float startY = cam.viewportHeight / 2;
+			int mapWidth = tiledMap.getProperties().get("width", Integer.class);
+			int mapHeight = tiledMap.getProperties().get("height", Integer.class);
+			boundary(cam, startX, startY, mapWidth * TILE_SIZE - startX * 2, mapHeight * TILE_SIZE - startY * 2);
 			tiledMapRenderer.setView(cam);
 			tiledMapRenderer.render();
 			
@@ -322,5 +339,26 @@ public class MainScreen implements Screen, InputProcessor{
 	public boolean scrolled(float amountX, float amountY) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	//check if camera is inside the boundaries (inside the tiled map)
+	public static void boundary(Camera cam, float startX, float startY, float width, float height) {
+		Vector3 position = cam.position;
+		
+		if(position.x < startX) {
+			position.x = startX;
+		}
+		if(position.y < startY) {
+			position.y = startY;
+		}
+		if(position.x > startX + width) {
+			position.x = startX + width;
+		}
+		if(position.y > startY + height) {
+			position.y = startY + height;
+		}
+		
+		cam.position.set(position);
+		cam.update();
 	}
 }
