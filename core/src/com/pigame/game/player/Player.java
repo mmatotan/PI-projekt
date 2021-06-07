@@ -1,6 +1,9 @@
 package com.pigame.game.player;
 
+import com.badlogic.gdx.Gdx;
+
 public class Player {
+	
 	//Main stats, X&Y are coordinates on a map
 	private int HP;
 	private int maxHP;
@@ -9,11 +12,14 @@ public class Player {
 	private int X;
 	private int Y;
 	
-	public Player(){
+	public Player(int x, int y){
 		this.maxHP = 100;
-		this.HP = 20;
+		this.HP = 100;
 		this.maxMana = 100;
 		this.mana = 0;
+		// Set player to the middle of the screen
+		this.X = x;
+		this.Y = y;
 	}
 	
 	public int getX() {
